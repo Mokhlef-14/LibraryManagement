@@ -38,6 +38,14 @@ public class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, BookD
         _context.Books.Add(book);
         await _context.SaveChangesAsync(cancellationToken);
 
+        _context.UserActivityLogs.Add(new UserActivityLog
+        {
+            SystemUserId = 0,
+            Action = "CreateBook",
+            Details = $"Created book: {book.Title}",
+            CreatedAt = DateTime.UtcNow
+        });
+
         return await GetBookDto(book.Id, cancellationToken);
     }
 

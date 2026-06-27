@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using LibraryManagement.Application.Data;
 using LibraryManagement.Application.DTOs.Auth;
-using LibraryManagement.Application.Data;
 using LibraryManagement.Application.Services;
+using LibraryManagement.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagement.Application.Features.Auth.Commands;
@@ -33,6 +34,15 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
             throw new UnauthorizedAccessException("Invalid email or password");
 
         user.LastLoginAt = DateTime.UtcNow;
+
+        _context.UserActivityLogs.Add(new UserActivityLog
+        {
+            SystemUserId = user.Id,
+            Action = "Login",
+            Details = $"User {user.Email} logged in",
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var token = _jwtService.GenerateToken(user);

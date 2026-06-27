@@ -43,6 +43,14 @@ public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, BookD
         foreach (var categoryId in request.CategoryIds)
             book.BookCategories.Add(new BookCategory { CategoryId = categoryId });
 
+        _context.UserActivityLogs.Add(new UserActivityLog
+        {
+            SystemUserId = 0,
+            Action = "UpdateBook",
+            Details = $"Updated book ID: {request.Id}",
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var updated = await _context.Books
